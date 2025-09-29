@@ -74,7 +74,7 @@ export const Footer = () => {
           </a>
         ))}
       </div>
-      <p>© 2024 Mira. All rights reserved.</p>
+      <p>© 2025 Mira. All rights reserved.</p>
     </footer>
   );
 };
