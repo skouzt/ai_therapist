@@ -1,28 +1,18 @@
 import type { Metadata } from "next";
+import { Manrope } from "next/font/google";
 import {
   ClerkProvider,
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
 } from "@clerk/nextjs";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const manrope = Manrope({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["400", "500", "700", "800"],
 });
 
 export const metadata: Metadata = {
-  title: "AI Therapist - Clerk Next.js App",
-  description: "AI Therapist application with Clerk authentication",
+  title: "Mira-AI Voice Therapist",
+  description: "AI Voice Therapist application",
 };
 
 export default function RootLayout({
@@ -34,30 +24,8 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          className={`${manrope.className} bg-background-light font-display text-[#101c22]`}
         >
-          <header className="p-4 border-b">
-            <div className="max-w-7xl mx-auto flex justify-between items-center">
-              <h1 className="text-xl font-bold">AI Therapist</h1>
-              <div className="flex gap-4 items-center">
-                <SignedOut>
-                  <SignInButton mode="modal">
-                    <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors">
-                      Sign In
-                    </button>
-                  </SignInButton>
-                  <SignUpButton mode="modal">
-                    <button className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md transition-colors">
-                      Sign Up
-                    </button>
-                  </SignUpButton>
-                </SignedOut>
-                <SignedIn>
-                  <UserButton afterSignOutUrl="/" />
-                </SignedIn>
-              </div>
-            </div>
-          </header>
           {children}
         </body>
       </html>

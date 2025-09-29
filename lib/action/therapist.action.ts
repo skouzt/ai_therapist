@@ -27,7 +27,6 @@ export interface TherapistSession {
   summary?: string;
 }
 
-// Create a new AI therapist profile
 export const createTherapist = async (formData: CreateTherapist) => {
   const { userId: author } = await auth();
 
