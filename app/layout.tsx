@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
-import {
-  ClerkProvider,
-} from "@clerk/nextjs";
+import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
+// 1. Import the Header/Navbar component
+import { Header } from "@/component/homepage/navbar";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -26,6 +26,9 @@ export default function RootLayout({
         <body
           className={`${manrope.className} bg-background-light font-display text-[#101c22]`}
         >
+          {/* 2. Place the Header component here */}
+          <Header />
+          
           {children}
         </body>
       </html>

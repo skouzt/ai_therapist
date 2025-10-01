@@ -8,7 +8,6 @@ import { CalmnessTrackerSection } from "@/component/homepage/CalmnessTrackerSect
 import { ExercisesPreviewSection } from "@/component/homepage/ExercisesPreviewSection";
 import { HeroSection } from "@/component/homepage/HeroSection";
 import { HowItWorksSection } from "@/component/homepage/HowItWorksSection";
-import { Header } from "@/component/homepage/navbar";
 import { TestimonialsSection } from "@/component/homepage/TestimonialsSection";
 
 // The Main Page Component
@@ -24,8 +23,8 @@ export default function HomePage() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 w-[25rem] h-[25rem] bg-gradient-to-t from-purple-200 via-violet-200 to-transparent opacity-30 blur-3xl rounded-full -z-10"></div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <Header />
-        <main className="mt-8 md:mt-12 space-y-12">
+        
+       <main className="space-y-12">
           <HeroSection />
           <HowItWorksSection />
           <ExercisesPreviewSection />

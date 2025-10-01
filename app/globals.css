@@ -9,18 +9,34 @@
   --background: var(--background-light);
   --foreground: #333;
 }
-
+html,
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
+/* Old:
 .glassmorphism {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
+}
+*/
+
+.liquid-glass {
+  /* Increase transparency (lower alpha) for a "liquidy" feel */
+  background: rgba(255, 255, 255, 0.05); 
+  /* Reduce blur slightly so elements behind are clearer, aiding the liquid look */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  /* Make the border thinner and slightly less visible */
+  border: 0.5px solid rgba(255, 255, 255, 0.1); 
+  /* Add a subtle inset shadow for depth/sheen */
+  box-shadow: 0 4px 60px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.08); 
 }
 
 @keyframes spin-slow {
@@ -33,4 +49,22 @@ body {
 }
 .animate-spin-slow-reverse {
   animation: spin-slow 25s linear infinite reverse;
+}
+
+
+@keyframes color-flow {
+  0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); opacity: 0.6; }
+  25% { transform: translate(-40%, -60%) rotate(90deg) scale(1.05); opacity: 0.7; }
+  50% { transform: translate(-60%, -40%) rotate(180deg) scale(1.1); opacity: 0.65; }
+  75% { transform: translate(-70%, -30%) rotate(270deg) scale(1.03); opacity: 0.75; }
+  100% { transform: translate(-50%, -50%) rotate(360deg) scale(1); opacity: 0.6; }
+}
+
+.animate-color-flow {
+  /* Use a long duration for a subtle, liquid motion effect */
+  animation: color-flow 40s ease-in-out infinite alternate;
+}
+.btn-signin {
+  /* Fix the typo: it should be @apply, not @pply */
+  @apply border border-black rounded-full px-4 py-2.5 text-sm font-semibold flex items-center gap-2 cursor-pointer;
 }
