@@ -17,15 +17,25 @@ export const Header = () => {
         { name: "Home", href: "/" },
         { name: "Exercise", href: "/exercise" },
         { name: "About", href: "about" },
-        { name: "Subscription", href: "#" },
+        { name: "Subscription", href: "/Subscription" },
     ];
 
     return (
-        // 1. Add max-width (e.g., max-w-4xl) to control the size.
-        // 2. Add mx-auto to center the element horizontally.
-        // 3. Keep 'sticky' but adjust 'top' and 'mt' for placement.
-        <header className="sticky top-4 z-50 mt-4 max-w-4xl mx-auto">
-            {/* The nav bar content remains the same size relative to the header */}
+        <header className="sticky top-4 z-50 mt-4 max-w-4xl mx-auto relative">
+            {/* Left Gradient Effect */}
+            <div className="absolute -left-20 top-1/2 -translate-y-1/2 -z-10 
+                            w-[20rem] h-[20rem] 
+                            bg-gradient-to-tr from-orange-200 via-pink-200 to-rose-300 
+                            opacity-30 blur-3xl rounded-full pointer-events-none">
+            </div>
+
+            {/* Right Gradient Effect */}
+            <div className="absolute -right-20 top-1/2 -translate-y-1/2 -z-10 
+                            w-[20rem] h-[20rem] 
+                            bg-gradient-to-bl from-blue-200 via-indigo-200 to-purple-300 
+                            opacity-30 blur-3xl rounded-full pointer-events-none">
+            </div>
+
             <nav className="flex items-center justify-between whitespace-nowrap rounded-full p-2 px-6 liquid-glass shadow-lg">
                 <div className="flex items-center gap-2 text-inherit">
                     <MiraLogo />
@@ -38,20 +48,18 @@ export const Header = () => {
                         </NavLink>
                     ))}
                 </div>
-                 <div className='flex items-center gap-8'>
-            
-            <SignedOut>
-                <SignInButton>
-                  <button className="btn-signin">
-                  Sign In
-                  </button>
-                </SignInButton>
-              </SignedOut>
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
-            
-        </div>
+                <div className='flex items-center gap-8'>
+                    <SignedOut>
+                        <SignInButton>
+                            <button className="btn-signin">
+                                Sign In
+                            </button>
+                        </SignInButton>
+                    </SignedOut>
+                    <SignedIn>
+                        <UserButton />
+                    </SignedIn>
+                </div>
             </nav>
         </header>
     );
