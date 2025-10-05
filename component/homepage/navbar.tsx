@@ -15,7 +15,7 @@ const NavLink = ({ href, children }: { href: string; children: React.ReactNode }
 export const Header = () => {
     const navItems = [
         { name: "Home", href: "/" },
-        { name: "Exercise", href: "/exercise" },
+        { name: "Haven", href: "/Haven" },
         { name: "About", href: "about" },
         { name: "Subscription", href: "/Subscription" },
     ];

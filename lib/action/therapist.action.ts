@@ -1,413 +1,362 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { createsupabaseClient } from "../supabase";
+import { createsupabaseClient } from "@/lib/supabase/server";
+import { revalidatePath } from "next/cache";
+import { CreateTherapy, SessionResponse, UpdateSessionData } from "@/types";
 
-// Types
-export interface CreateTherapist {
-  name: string;
-  style: string;
-  voice: string;
-  language: string;
-  gender: string;
-  primary_concern: string;
-  therapy_goal: string;
+
+export const createTherapy = async (formData: CreateTherapy) => {
+    const { userId: author } = await auth();
+    const supabase = createsupabaseClient();
+
+    const { data, error } = await supabase.from('user').insert({ ...formData, author }).select();
+
+    if (error || !data) throw new Error(error?.message || "failed to create a session");
+
+    return data[0];
 }
 
-export interface UpdateTherapist extends Partial<CreateTherapist> {
-  id: string;
+export const getcompanion = async(id: string) => {
+    const supabse = createsupabaseClient()
+   const {data, error} = await supabse
+    .from('user')
+    .select()
+    .eq('id',id)
+    if(error) return console.log(error)
+        return data[0]
+}
+/**
+ * 
+ * Get all therapy sessions for the current user
+ */
+export async function getUserTherapySessions(): Promise<SessionResponse> {
+  try {
+    const { userId } = await auth();
+
+    if (!userId) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const supabase = await createsupabaseClient();
+
+    const { data: sessions, error } = await supabase
+      .from("TherapySessions")
+      .select("*")
+      .eq("user_id", userId)
+      .order("start_time", { ascending: false });
+
+    if (error) {
+      console.error("Supabase error:", error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data: sessions };
+  } catch (error) {
+    console.error("Error fetching therapy sessions:", error);
+    return { success: false, error: "Failed to fetch sessions" };
+  }
 }
 
-export interface TherapistSession {
-  id?: string;
-  profile_id: string;
-  started_at: string;
-  ended_at?: string;
-  title?: string;
-  summary?: string;
+/**
+ * Get a specific therapy session by ID
+ */
+export async function getTherapySessionById(
+  sessionId: number
+): Promise<SessionResponse> {
+  try {
+    const { userId } = await auth();
+
+    if (!userId) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const supabase = await createsupabaseClient();
+
+    const { data: session, error } = await supabase
+      .from("TherapySessions")
+      .select("*")
+      .eq("session_id", sessionId)
+      .eq("user_id", userId)
+      .single();
+
+    if (error) {
+      console.error("Supabase error:", error);
+      return { success: false, error: error.message };
+    }
+
+    if (!session) {
+      return { success: false, error: "Session not found" };
+    }
+
+    return { success: true, data: session };
+  } catch (error) {
+    console.error("Error fetching therapy session:", error);
+    return { success: false, error: "Failed to fetch session" };
+  }
 }
 
-export const createTherapist = async (formData: CreateTherapist) => {
-  const { userId: author } = await auth();
-
-  if (!author) {
-    throw new Error("User not authenticated");
-  }
-
-  const supabase = createsupabaseClient();
-
-  const { data, error } = await supabase
-    .from("therapist")
-    .insert({ ...formData, author })
-    .select()
-    .single();
-
-  if (error) {
-    console.error("Error creating therapist:", error);
-    throw new Error(error.message || "Failed to create therapist");
-  }
-
-  if (!data) {
-    throw new Error("No data returned from therapist creation");
-  }
-
-  return data;
-};
-
-// Get all therapists for the authenticated user
-export const getUserTherapists = async () => {
-  const { userId: author } = await auth();
-
-  if (!author) {
-    throw new Error("User not authenticated");
-  }
-
-  const supabase = createsupabaseClient();
-
-  const { data, error } = await supabase
-    .from("therapist")
-    .select("*")
-    .eq("author", author)
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error("Error fetching therapists:", error);
-    throw new Error(error.message || "Failed to fetch therapists");
-  }
-
-  return data || [];
-};
-
-// Get a specific therapist by ID
-export const getTherapistById = async (therapistId: string) => {
-  const { userId: author } = await auth();
-
-  if (!author) {
-    throw new Error("User not authenticated");
-  }
-
-  const supabase = createsupabaseClient();
-
-  const { data, error } = await supabase
-    .from("therapist")
-    .select("*")
-    .eq("id", therapistId)
-    .eq("author", author)
-    .single();
-
-  if (error) {
-    console.error("Error fetching therapist:", error);
-    throw new Error(error.message || "Failed to fetch therapist");
-  }
-
-  return data;
-};
-
-// Update an existing therapist
-export const updateTherapist = async (updateData: UpdateTherapist) => {
-  const { userId: author } = await auth();
-
-  if (!author) {
-    throw new Error("User not authenticated");
-  }
-
-  const supabase = createsupabaseClient();
-  const { id, ...updateFields } = updateData;
-
-  const { data, error } = await supabase
-    .from("therapist")
-    .update(updateFields)
-    .eq("id", id)
-    .eq("author", author)
-    .select()
-    .single();
-
-  if (error) {
-    console.error("Error updating therapist:", error);
-    throw new Error(error.message || "Failed to update therapist");
-  }
-
-  return data;
-};
-
-// Delete a therapist
-export const deleteTherapist = async (therapistId: string) => {
-  const { userId: author } = await auth();
-
-  if (!author) {
-    throw new Error("User not authenticated");
-  }
-
-  const supabase = createsupabaseClient();
-
-  // First, delete all associated sessions
-  await supabase.from("session_history").delete().eq("profile_id", therapistId);
-
-  // Then delete the therapist
-  const { error } = await supabase
-    .from("therapist")
-    .delete()
-    .eq("id", therapistId)
-    .eq("author", author);
-
-  if (error) {
-    console.error("Error deleting therapist:", error);
-    throw new Error(error.message || "Failed to delete therapist");
-  }
-
-  return { success: true };
-};
-
-// Session management functions
-
-// Create a new therapy session
-export const createSession = async (profileId: string, title?: string) => {
-  const { userId } = await auth();
-
-  if (!userId) {
-    throw new Error("User not authenticated");
-  }
-
-  const supabase = createsupabaseClient();
-
-  // Verify the therapist belongs to the user
-  const { data: therapist } = await supabase
-    .from("therapist")
-    .select("id")
-    .eq("id", profileId)
-    .eq("author", userId)
-    .single();
-
-  if (!therapist) {
-    throw new Error("Therapist not found or access denied");
-  }
-
-  const { data, error } = await supabase
-    .from("session_history")
-    .insert({
-      profile_id: profileId,
-      started_at: new Date().toISOString(),
-      title: title || `Session ${new Date().toLocaleDateString()}`,
-    })
-    .select()
-    .single();
-
-  if (error) {
-    console.error("Error creating session:", error);
-    throw new Error(error.message || "Failed to create session");
-  }
-
-  return data;
-};
-
-// End a therapy session
-export const endSession = async (sessionId: number, summary?: string) => {
-  const { userId } = await auth();
-
-  if (!userId) {
-    throw new Error("User not authenticated");
-  }
-
-  const supabase = createsupabaseClient();
-
-  // Verify session belongs to user's therapist
-  const { data: session } = await supabase
-    .from("session_history")
-    .select(
-      `
-      id,
-      therapist:profile_id (
-        author
-      )
-    `
-    )
-    .eq("id", sessionId)
-    .single();
-
-  if (!session || session.therapist?.author !== userId) {
-    throw new Error("Session not found or access denied");
-  }
-
-  const { data, error } = await supabase
-    .from("session_history")
-    .update({
-      ended_at: new Date().toISOString(),
-      summary: summary,
-    })
-    .eq("id", sessionId)
-    .select()
-    .single();
-
-  if (error) {
-    console.error("Error ending session:", error);
-    throw new Error(error.message || "Failed to end session");
-  }
-
-  return data;
-};
-
-// Get all sessions for a therapist
-export const getTherapistSessions = async (therapistId: string) => {
-  const { userId } = await auth();
-
-  if (!userId) {
-    throw new Error("User not authenticated");
-  }
-
-  const supabase = createsupabaseClient();
-
-  // Verify therapist belongs to user
-  const { data: therapist } = await supabase
-    .from("therapist")
-    .select("id")
-    .eq("id", therapistId)
-    .eq("author", userId)
-    .single();
-
-  if (!therapist) {
-    throw new Error("Therapist not found or access denied");
-  }
-
-  const { data, error } = await supabase
-    .from("session_history")
-    .select("*")
-    .eq("profile_id", therapistId)
-    .order("started_at", { ascending: false });
-
-  if (error) {
-    console.error("Error fetching sessions:", error);
-    throw new Error(error.message || "Failed to fetch sessions");
-  }
-
-  return data || [];
-};
-
-// Get a specific session
-export const getSessionById = async (sessionId: number) => {
-  const { userId } = await auth();
-
-  if (!userId) {
-    throw new Error("User not authenticated");
-  }
-
-  const supabase = createsupabaseClient();
-
-  const { data, error } = await supabase
-    .from("session_history")
-    .select(
-      `
-      *,
-      therapist:profile_id (
-        id,
-        name,
-        style,
-        voice,
-        language,
-        gender,
-        primary_concern,
-        therapy_goal
-      )
-    `
-    )
-    .eq("id", sessionId)
-    .single();
-
-  if (error) {
-    console.error("Error fetching session:", error);
-    throw new Error(error.message || "Failed to fetch session");
-  }
-
-  // Verify session belongs to user's therapist
-  if (data.therapist?.author !== userId) {
-    throw new Error("Session not found or access denied");
-  }
-
-  return data;
-};
-
-// Update session details
-export const updateSession = async (
+/**
+ * Update a therapy session (end time, summary, etc.)
+ */
+export async function updateTherapySession(
   sessionId: number,
-  updates: { title?: string; summary?: string }
-) => {
-  const { userId } = await auth();
+  updates: UpdateSessionData
+): Promise<SessionResponse> {
+  try {
+    const { userId } = await auth();
 
-  if (!userId) {
-    throw new Error("User not authenticated");
+    if (!userId) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const supabase = await createsupabaseClient();
+
+    // First verify the session belongs to the user
+    const { data: existingSession, error: fetchError } = await supabase
+      .from("TherapySessions")
+      .select("session_id")
+      .eq("session_id", sessionId)
+      .eq("user_id", userId)
+      .single();
+
+    if (fetchError || !existingSession) {
+      return { success: false, error: "Session not found or unauthorized" };
+    }
+
+    // Update the session
+    const { data: updatedSession, error: updateError } = await supabase
+      .from("TherapySessions")
+      .update(updates)
+      .eq("session_id", sessionId)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error("Supabase error:", updateError);
+      return { success: false, error: updateError.message };
+    }
+
+    revalidatePath("/sessions");
+    revalidatePath(`/sessions/${sessionId}`);
+    return { success: true, data: updatedSession };
+  } catch (error) {
+    console.error("Error updating therapy session:", error);
+    return { success: false, error: "Failed to update session" };
   }
+}
 
-  const supabase = createsupabaseClient();
+/**
+ * End a therapy session (set end_time and optionally add summary)
+ */
+export async function endTherapySession(
+  sessionId: number,
+  sessionSummary?: string
+): Promise<SessionResponse> {
+  try {
+    const { userId } = await auth();
 
-  // Verify session belongs to user's therapist
-  const { data: session } = await supabase
-    .from("session_history")
-    .select(
-      `
-      id,
-      therapist:profile_id (
-        author
-      )
-    `
-    )
-    .eq("id", sessionId)
-    .single();
+    console.log("🔐 Ending session - userId:", userId, "sessionId:", sessionId);
 
-  if (!session || session.therapist?.author !== userId) {
-    throw new Error("Session not found or access denied");
+    if (!userId) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const supabase = await createsupabaseClient();
+    
+    console.log("🔍 Supabase client type:", typeof supabase);
+    console.log("🔍 Supabase object keys:", Object.keys(supabase || {}));
+    console.log("🔍 Has .from?:", typeof supabase?.from);
+
+    // Check if session exists and belongs to user
+    const { data: session, error: fetchError } = await supabase
+      .from("TherapySessions")
+      .select("*")
+      .eq("session_id", sessionId)
+      .eq("user_id", userId)
+      .single();
+
+    console.log("📋 Existing session:", session);
+    console.log("❌ Fetch error:", fetchError);
+
+    if (fetchError || !session) {
+      return { success: false, error: "Session not found or unauthorized" };
+    }
+
+    if (session.end_time) {
+      return { success: false, error: "Session already ended" };
+    }
+
+    // Update with end time
+    const updateData: any = {
+      end_time: new Date().toISOString(),
+    };
+
+    if (sessionSummary) {
+      updateData.session_summary = sessionSummary;
+    }
+
+    console.log("📝 Updating session with:", updateData);
+
+    const { data: updatedSession, error: updateError } = await supabase
+      .from("TherapySessions")
+      .update(updateData)
+      .eq("session_id", sessionId)
+      .select()
+      .single();
+
+    console.log("✅ Updated session:", updatedSession);
+    console.log("❌ Update error:", updateError);
+
+    if (updateError) {
+      console.error("Supabase error:", updateError);
+      return { success: false, error: updateError.message };
+    }
+
+    revalidatePath("/sessions");
+    revalidatePath(`/sessions/${sessionId}`);
+    return { success: true, data: updatedSession };
+  } catch (error) {
+    console.error("Error ending therapy session:", error);
+    return { success: false, error: "Failed to end session" };
   }
+}
 
-  const { data, error } = await supabase
-    .from("session_history")
-    .update(updates)
-    .eq("id", sessionId)
-    .select()
-    .single();
+/**
+ * Delete a therapy session
+ */
+export async function deleteTherapySession(
+  sessionId: number
+): Promise<SessionResponse> {
+  try {
+    const { userId } = await auth();
 
-  if (error) {
-    console.error("Error updating session:", error);
-    throw new Error(error.message || "Failed to update session");
+    if (!userId) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const supabase = await createsupabaseClient();
+
+    // Verify session belongs to user before deleting
+    const { data: session, error: fetchError } = await supabase
+      .from("TherapySessions")
+      .select("session_id")
+      .eq("session_id", sessionId)
+      .eq("user_id", userId)
+      .single();
+
+    if (fetchError || !session) {
+      return { success: false, error: "Session not found or unauthorized" };
+    }
+
+    const { error: deleteError } = await supabase
+      .from("TherapySessions")
+      .delete()
+      .eq("session_id", sessionId);
+
+    if (deleteError) {
+      console.error("Supabase error:", deleteError);
+      return { success: false, error: deleteError.message };
+    }
+
+    revalidatePath("/sessions");
+    return { success: true, data: { sessionId } };
+  } catch (error) {
+    console.error("Error deleting therapy session:", error);
+    return { success: false, error: "Failed to delete session" };
   }
+}
 
-  return data;
-};
+/**
+ * Get active (ongoing) session for current user
+ */
+export async function getActiveSession(): Promise<SessionResponse> {
+  try {
+    const { userId } = await auth();
 
-// Delete a session
-export const deleteSession = async (sessionId: number) => {
-  const { userId } = await auth();
+    if (!userId) {
+      return { success: false, error: "Unauthorized" };
+    }
 
-  if (!userId) {
-    throw new Error("User not authenticated");
+    const supabase = await createsupabaseClient();
+
+    const { data: activeSession, error } = await supabase
+      .from("TherapySessions")
+      .select("*")
+      .eq("user_id", userId)
+      .is("end_time", null)
+      .order("start_time", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error && error.code !== "PGRST116") {
+      // PGRST116 is "no rows returned"
+      console.error("Supabase error:", error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data: activeSession || null };
+  } catch (error) {
+    console.error("Error fetching active session:", error);
+    return { success: false, error: "Failed to fetch active session" };
   }
+}
 
-  const supabase = createsupabaseClient();
+/**
+ * Get session statistics for current user
+ */
+export async function getSessionStatistics(): Promise<SessionResponse> {
+  try {
+    const { userId } = await auth();
 
-  // Verify session belongs to user's therapist
-  const { data: session } = await supabase
-    .from("session_history")
-    .select(
-      `
-      id,
-      therapist:profile_id (
-        author
-      )
-    `
-    )
-    .eq("id", sessionId)
-    .single();
+    if (!userId) {
+      return { success: false, error: "Unauthorized" };
+    }
 
-  if (!session || session.therapist?.author !== userId) {
-    throw new Error("Session not found or access denied");
+    const supabase = await createsupabaseClient();
+
+    // Get all sessions for the user
+    const { data: sessions, error } = await supabase
+      .from("TherapySessions")
+      .select("start_time, end_time")
+      .eq("user_id", userId);
+
+    if (error) {
+      console.error("Supabase error:", error);
+      return { success: false, error: error.message };
+    }
+
+    const totalSessions = sessions?.length || 0;
+    const completedSessions =
+      sessions?.filter((s) => s.end_time !== null).length || 0;
+    const activeSessions = totalSessions - completedSessions;
+
+    // Calculate total session time
+    let totalMinutes = 0;
+    sessions?.forEach((session) => {
+      if (session.end_time) {
+        const duration =
+          new Date(session.end_time).getTime() -
+          new Date(session.start_time).getTime();
+        totalMinutes += duration / (1000 * 60);
+      }
+    });
+
+    return {
+      success: true,
+      data: {
+        totalSessions,
+        completedSessions,
+        activeSessions,
+        totalMinutes: Math.round(totalMinutes),
+        averageSessionMinutes:
+          completedSessions > 0
+            ? Math.round(totalMinutes / completedSessions)
+            : 0,
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching session statistics:", error);
+    return { success: false, error: "Failed to fetch statistics" };
   }
-
-  const { error } = await supabase
-    .from("session_history")
-    .delete()
-    .eq("id", sessionId);
-
-  if (error) {
-    console.error("Error deleting session:", error);
-    throw new Error(error.message || "Failed to delete session");
-  }
-
-  return { success: true };
-};
+}
