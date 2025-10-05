@@ -8,7 +8,7 @@ import { CreateTherapy, SessionResponse, UpdateSessionData } from "@/types";
 
 export const createTherapy = async (formData: CreateTherapy) => {
     const { userId: author } = await auth();
-    const supabase = createsupabaseClient();
+    const supabase = await createsupabaseClient();
 
     const { data, error } = await supabase.from('user').insert({ ...formData, author }).select();
 
@@ -18,7 +18,7 @@ export const createTherapy = async (formData: CreateTherapy) => {
 }
 
 export const getcompanion = async(id: string) => {
-    const supabse = createsupabaseClient()
+    const supabse = await createsupabaseClient()
    const {data, error} = await supabse
     .from('user')
     .select()

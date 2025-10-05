@@ -45,7 +45,7 @@ const PRONOUN_OPTIONS = [
 
 // --- Schema (Unchanged) ---
 const formSchema = z.object({
-    preferredName: z.string().min(1, { message: "Your preferred name is required." }),
+    preferred_name: z.string().min(1, { message: "Your preferred name is required." }),
     pronouns: z.string().optional(),
     voice: z.enum(Object.keys(VOICE_OPTIONS) as [keyof typeof VOICE_OPTIONS, ...Array<keyof typeof VOICE_OPTIONS>]),
     style: z.enum(Object.keys(STYLE_OPTIONS) as [keyof typeof STYLE_OPTIONS, ...Array<keyof typeof STYLE_OPTIONS>]),
@@ -59,7 +59,7 @@ const UserForm = () => {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: { 
-            preferredName: "",
+            preferred_name: "",
             pronouns: "",
             voice: "female", 
             style: "casual", 
@@ -87,7 +87,7 @@ const UserForm = () => {
     {/* Preferred Name */}
     <FormField
       control={form.control}
-      name="preferredName"
+      name="preferred_name"
       render={({ field }) => (
         <FormItem>
           <FormLabel>Preferred Name *</FormLabel>
