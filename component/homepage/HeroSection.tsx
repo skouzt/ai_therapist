@@ -1,3 +1,6 @@
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+
 const VoiceIcon = () => (
   <svg
     className="w-48 h-48 text-black/70"
@@ -66,13 +69,15 @@ export const HeroSection = () => {
           offers personalized exercises and feedback to help you achieve
           emotional well-being.
         </p>
-        <button
-          className="mt-10 bg-primary text-white font-bold py-4 px-8 rounded-full 
-                     shadow-lg shadow-primary/30 hover:scale-105 transition-all 
-                     duration-300"
+        <Link href="/Haven/new" passHref>
+       <Button
+          className="md-10 mt-10 bg-primary text-white font-bold py-4 px-8 rounded-full 
+                    shadow-lg shadow-gray-700/30 hover:scale-105 transition-all 
+                    duration-300"
         >
           Start Your Journey
-        </button>
+        </Button>
+        </Link>
       </div>
 
       {/* Right Visualization */}

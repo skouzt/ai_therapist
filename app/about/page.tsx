@@ -1,5 +1,7 @@
 "use client"; // Required for using CSS animations
 
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 import React from 'react';
 
 const AboutPage = () => {
@@ -51,9 +53,11 @@ const AboutPage = () => {
                                 <p className="text-base md:text-lg text-white/90">
                                     At Mira, we're pioneering a new era of mental health support. By harnessing the power of AI and voice analysis, we provide personalized insights and guidance to help you understand and manage your emotional landscape.
                                 </p>
-                                <button className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-white text-base font-bold transition-all hover:bg-primary/90">
+                                <Link href="/Haven/new" passHref>
+                                <Button className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-white text-base font-bold transition-all hover:bg-primary/90">
                                     <span className="truncate">Start Your Journey</span>
-                                </button>
+                                </Button>
+                                </Link>
                             </div>
                         </section>
 
@@ -158,13 +162,14 @@ const AboutPage = () => {
                             <h2 className="text-4xl font-bold max-w-2xl mx-auto">
                                 Ready to Hear Your Progress?
                             </h2>
-                            <button
+                            <Link href="/Haven/new" passHref>
+                            <Button
                                 className="mt-8 bg-primary text-white font-bold py-4 px-8 
                                             rounded-full shadow-lg shadow-primary/30 hover:scale-105 
-                                            transition-all duration-300"
-                            >
+                                            transition-all duration-300">
                                 <span className="truncate">Start Your Journey</span>
-                            </button>
+                            </Button>
+                            </Link>
                         </section>
                     </div>
                 </main>

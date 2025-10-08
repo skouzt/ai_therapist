@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React from "react";
 
 // AboutSection.jsx
@@ -39,6 +40,7 @@ export const CtaSection = () => {
       <h2 className="text-4xl font-bold max-w-2xl mx-auto">
         Start your healing journey today.
       </h2>
+       <Link href="/Haven/new" passHref>
       <button
         className="mt-8 bg-primary text-white font-bold py-4 px-8 
                    rounded-full shadow-lg shadow-primary/30 hover:scale-105 
@@ -46,6 +48,7 @@ export const CtaSection = () => {
       >
         Get Started with Mira
       </button>
+      </Link>
     </section>
   );
 };

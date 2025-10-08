@@ -1,155 +1,107 @@
-# Mira – AI Voice Therapist
+# Mira - Your Personal AI Voice Companion
 
-![Mira Logo](https://your-logo-url.com/mira-logo.png) <!-- Replace with your actual logo URL -->
+Mira is a conversational AI therapist designed to provide a safe and supportive space for users to explore their thoughts and feelings. Leveraging cutting-edge voice technology, Mira offers an empathetic and interactive experience for emotional well-being.
 
-**"Your AI-powered companion for calm, clarity, and mental wellness."**
+![Mira AI Therapist Homepage Screenshot](https://i.postimg.cc/MHGnCV27/Screenshot-2025-10-09-035104.png)
 
----
 
-## Overview
+## 🚀 Project Overview
 
-Mira is an innovative AI voice therapist application designed to support your mental wellness journey. Through natural and empathetic voice conversations, Mira offers a safe space to explore your thoughts and feelings. It combines the power of advanced AI with a calming, intuitive user interface to provide personalized support, stress management techniques, mood tracking, and guided therapeutic exercises.
+This application provides a seamless and engaging platform for users to interact with an AI companion. It features a comprehensive user onboarding process, allowing for the creation and customization of AI therapists, and a dynamic chat interface for real-time voice conversations.
 
-Our mission is to make mental wellness support accessible, private, and stigma-free for everyone.
+### The Problem
 
----
+In a fast-paced world, finding accessible and immediate emotional support can be challenging. Traditional therapy can be expensive and time-consuming, leaving many without the help they need.
 
-## Key Features
+### The Solution
 
-- **Voice-Based AI Conversations**: Engage in natural, therapeutic conversations powered by a sophisticated Large Language Model (LLM) with a RAG pipeline.
-- **Emotional Tone Detection**: Mira intelligently maps your voice input to sentiment, allowing for more empathetic and relevant responses.
-- **Guided Therapy Exercises**: Access a library of evidence-based exercises, including guided breathing, journaling prompts, and meditation sessions.
-- **Progress Tracking & Daily Check-ins**: Monitor your mood, track your progress over time, and engage in daily check-ins to foster self-awareness.
-- **Cross-Platform Friendly**: Built with a modern tech stack (Next.js, Node.js API, Clerk) to ensure a seamless experience across devices.
-- **Privacy-First Approach**: Your conversations are confidential. We are committed to handling your data securely and with the utmost respect for your privacy.
+Mira offers an AI-driven voice therapy solution that is available anytime, anywhere. It provides a non-judgmental space for users to talk, reflect, and receive supportive feedback, helping to improve mental and emotional resilience.
 
----
+## ✨ Features
 
-## Tech Stack
+- **User Authentication:** Secure sign-up and sign-in functionality powered by Clerk.
+- **Companion Creation:** An intuitive form for users to create and customize their personal AI therapist, choosing from different voices and styles.
+- **Dynamic Voice Chat:** A real-time, interactive chat interface where users can speak with their AI companion.
+- **Session Management:** Users can create new therapy sessions and view their history in the "Haven" dashboard.
+- **Responsive Design:** A modern and clean UI that works seamlessly across all devices.
+- **Dynamic Theming:** Supports both light and dark modes, with a theming system built on CSS variables.
 
-- **Frontend**: [Next.js](https://nextjs.org/), [TailwindCSS](https://tailwindcss.com/), [Framer Motion](https://www.framer.com/motion/)
-- **Backend**: [Node.js](https://nodejs.org/) / [Express](https://expressjs.com/)
-- **AI & Voice**: [Vapi](https://vapi.ai/), [ChatGPT-4](https://openai.com/chatgpt), [ElevenLabs](https://elevenlabs.io/)
-- **Authentication & Subscriptions**: [Clerk](https://clerk.com/)
-- **Deployment**: [Vercel](https://vercel.com/), [Railway](https://railway.app/)
+## 🛠️ Tech Stack
 
----
+- **Framework:** Next.js
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS, shadcn/ui
+- **Form Management:** React Hook Form, Zod
+- **Authentication:** Clerk
+- **Database:** Supabase
+- **AI Voice Service:** Vapi AI
 
-## Installation & Setup
+## ⚙️ Setup & Installation
 
-Follow these steps to get your local development environment up and running.
+Follow these steps to get the project up and running on your local machine.
 
-### Prerequisites
+### 1. Prerequisites
 
-- [Node.js](https://nodejs.org/) (v18 or later)
-- `npm` or `yarn`
-- API keys for:
-  - Clerk
-  - ElevenLabs
-  - Vapi / OpenAI
+Ensure you have the following installed:
+- [Node.js](https://nodejs.org/en/) (v20 or later)
+- [npm](https://www.npmjs.com/) (or yarn/pnpm)
 
-### Installation
+### 2. Clone the Repository
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/your-username/mira-ai-therapist.git
-    cd mira-ai-therapist
-    ```
+```bash
+git clone https://github.com/skouzt/ai_therapist.git
+cd ai_therapist
+```
 
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    # or
-    yarn install
-    ```
+### 3. Install Dependencies
 
-3.  **Set up environment variables:**
-    Create a `.env.local` file in the root directory and add your API keys:
-    ```env
-    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
-    CLERK_SECRET_KEY=your_clerk_secret_key
+```bash
+npm install
+```
 
-    ELEVENLABS_API_KEY=your_elevenlabs_api_key
-    VAPI_API_KEY=your_vapi_api_key
-    OPENAI_API_KEY=your_openai_api_key
-    ```
+### 4. Set Up Environment Variables
 
-### Running the Development Server
+Create a `.env.local` file in the root of the project and add the following variables. You can find the necessary keys from the respective service dashboards.
+
+```env
+# Clerk
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+CLERK_SECRET_KEY=
+
+# Clerk Auth URLs
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/
+NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/
+
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+
+# Vapi AI
+NEXT_PUBLIC_VAPI_WEB_TOKEN=
+```
+
+### 5. Run the Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
+The application should now be running at [http://localhost:3000](http://localhost:3000).
 
-### Building for Production
+## 📂 Code Structure & Conventions
 
-```bash
-npm run build
-npm start
-```
+The project follows a feature-oriented structure to keep the codebase organized and maintainable.
 
----
+- **`app/`**: Contains all the routes and pages, following the Next.js App Router conventions.
+- **`component/`**: Houses higher-level, feature-specific components (e.g., `component/homepage`, `component/Mira`).
+- **`components/ui/`**: Includes reusable, low-level UI components from `shadcn/ui` (e.g., Button, Card, Input).
+- **`lib/`**: Handles business logic, server-side actions (`lib/action`), and client/SDK initializations (Supabase, Vapi).
+- **`constants/`**: Stores static data, such as configuration arrays and JSON files.
 
-## Usage
+## 🎨 Styling & Theming
 
-1.  **Sign Up / Log In**: New users can create an account or log in using Clerk's secure authentication.
-2.  **Start a Session**: From the dashboard, click the **"Talk to Mira"** button to initiate a new therapy session.
-3.  **Example Flow**:
-    - **Mood Check-in**: Mira starts by asking how you're feeling today.
-    - **AI Voice Response**: Based on your voice input and emotional tone, Mira responds empathetically.
-    - **Suggested Exercise**: If you're feeling stressed, Mira might suggest a guided breathing exercise.
-    - **Progress Tracking**: Your session summary and mood are logged in your personal dashboard for future reflection.
+The project uses **Tailwind CSS** for utility-first styling. The theming system is built with CSS variables, allowing for easy customization and dynamic switching between light and dark modes.
 
----
-
-## Screenshots / Demo
-
-*Placeholder for UI screenshots or a demo GIF/video.*
-
-| Homepage                               | Therapist Screen                         | Exercise Modal                           |
-| -------------------------------------- | ---------------------------------------- | ---------------------------------------- |
-| ![Homepage](https://via.placeholder.com/300) | ![Therapist Screen](https://via.placeholder.com/300) | ![Exercise Modal](https://via.placeholder.com/300) |
-
----
-
-## Roadmap
-
-We have an exciting future planned for Mira! Here are some features we're working on:
-
-- [ ] **Multi-Language Support**: Expanding Mira's accessibility to non-English speakers.
-- [ ] **Emotion-Aware Responses**: Enhancing the AI to adapt its conversational style based on your detected emotions.
-- [ ] **Dedicated Mobile App**: Native iOS and Android applications for a better on-the-go experience.
-- [ ] **Wearable Device Integration**: Syncing with devices like Apple Watch or Fitbit to provide proactive mood-sensing and support.
-
----
-
-## Contributing
-
-We welcome contributions from the community! To contribute, please follow these guidelines:
-
-1.  **Fork the repository.**
-2.  **Create a new branch**: `git checkout -b feature/your-feature-name`
-3.  **Make your changes** and adhere to the existing coding style.
-4.  **Commit your changes**: `git commit -m 'feat: Add some amazing feature'`
-5.  **Push to the branch**: `git push origin feature/your-feature-name`
-6.  **Create a Pull Request.**
-
-Please ensure your PRs are well-documented and explain the changes you've made.
-
----
-
-## License
-
-This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
-
----
-
-## Acknowledgements
-
-- The open-source LLM community for their incredible innovations.
-- [ElevenLabs](https://elevenlabs.io/) for their state-of-the-art voice generation technology.
-- [Clerk](https://clerk.com/) for simplifying authentication and user management.
-- All our contributors and users who believe in our mission.
+- **`globals.css`**: Defines the base styles and CSS variables for colors, borders, and other theme-related properties.
+- **`tailwind.config.js`**: Configures Tailwind CSS, extending the default theme with custom colors and properties that are mapped to the CSS variables. This setup, combined with `shadcn/ui`, provides a robust and flexible styling foundation.

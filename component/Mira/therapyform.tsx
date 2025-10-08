@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
+  FormDescription, // Added FormDescription (though we'll use <p> for consistency)
   FormField,
   FormItem,
   FormLabel,
@@ -113,22 +114,24 @@ export default function ImprovedUserForm() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 gap-6 md:grid-cols-2">
 
-            {/* Preferred Name */}
+            {/* Preferred Name - FIXED FOR ALIGNMENT */}
             <FormField
               control={form.control}
               name="preferred_name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="flex items-center justify-between">Preferred Name * <span className="ml-2 text-xs font-normal text-muted-foreground">How Mira will call you</span></FormLabel>
+                  {/* Keep label simple, move description below for consistent spacing */}
+                  <FormLabel>Preferred Name *</FormLabel>
                   <FormControl>
                     <Input aria-required value={field.value} onChange={field.onChange} placeholder="e.g., Alex" />
                   </FormControl>
+                  <p className="mt-1 text-xs text-muted-foreground">How Mira will call you</p>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Pronouns */}
+            {/* Pronouns - FIXED FOR ALIGNMENT */}
             <FormField
               control={form.control}
               name="pronouns"
@@ -150,14 +153,15 @@ export default function ImprovedUserForm() {
                       </SelectContent>
                     </Select>
                   </FormControl>
-                  <p className="mt-1 text-xs text-muted-foreground">Optional — helps Mira use correct pronouns.</p>
+                  {/* Standardize the description to match the spacing of the Preferred Name field */}
+                  <p className="mt-1 text-xs text-muted-foreground">Optional — helps Mira use correct pronouns.</p> 
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Voice */}
-            <div className="md:col-span-1">
+            {/* Voice (md:col-span-1 removed as it's the default behavior) */}
+            <div>
               <FormField
                 control={form.control}
                 name="voice"
@@ -184,8 +188,8 @@ export default function ImprovedUserForm() {
               />
             </div>
 
-            {/* Style */}
-            <div className="md:col-span-1">
+            {/* Style (md:col-span-1 removed as it's the default behavior) */}
+            <div>
               <FormField
                 control={form.control}
                 name="style"
