@@ -1,220 +1,298 @@
 "use client"
 
+import React, { useState } from "react"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { redirect} from "next/navigation" 
+import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select"
-import { createTherapy } from "@/lib/action/therapist.action"
+import { createUserProfile } from "@/lib/action/therapist.action"
 
-// --- Constants for Onboarding ---
+// --- Constants ---
 const VOICE_OPTIONS = {
-    male: "Male",
-    female: "Female",
-} as const;
+  male: "Male",
+  female: "Female",
+} as const
 
 const STYLE_OPTIONS = {
-    formal: "Formal", 
-    casual: "Casual",
-} as const;
+  formal: "Formal",
+  casual: "Casual",
+} as const
 
 const PRONOUN_OPTIONS = [
-    "She/Her",
-    "He/Him",
-    "They/Them",
-    "Prefer not to say"
+  "She/Her",
+  "He/Him",
+  "They/Them",
+  "Prefer not to say",
 ]
 
-// --- Schema (Unchanged) ---
+// --- Schema (cleaner) ---
 const formSchema = z.object({
-    preferred_name: z.string().min(1, { message: "Your preferred name is required." }),
-    pronouns: z.string().optional(),
-    voice: z.enum(Object.keys(VOICE_OPTIONS) as [keyof typeof VOICE_OPTIONS, ...Array<keyof typeof VOICE_OPTIONS>]),
-    style: z.enum(Object.keys(STYLE_OPTIONS) as [keyof typeof STYLE_OPTIONS, ...Array<keyof typeof STYLE_OPTIONS>]),
-    struggle: z.string().min(10, { message: "Please briefly describe what you're struggling with (min 10 characters)." }),
-    goal: z.string().min(10, { message: "Please state your main goal (min 10 characters)." }),
+  preferred_name: z.string().min(1, { message: "Your preferred name is required." }),
+  pronouns: z.string().optional(),
+  voice: z.enum(["male", "female"]),
+  style: z.enum(["formal", "casual"]),
+  struggle: z.string().min(10, { message: "Please briefly describe what you're struggling with (min 10 characters)." }),
+  goal: z.string().min(10, { message: "Please state your main goal (min 10 characters)." }),
 })
 
-// --- Component ---
-const UserForm = () => {
+type FormValues = z.infer<typeof formSchema>
 
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
-        defaultValues: { 
-            preferred_name: "",
-            pronouns: "",
-            voice: "female", 
-            style: "casual", 
-            struggle: "", 
-            goal: "", 
-        },
-    })
+export default function ImprovedUserForm() {
+  const router = useRouter()
+  const [serverError, setServerError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      preferred_name: "",
+      pronouns: "",
+      voice: "female",
+      style: "casual",
+      struggle: "",
+      goal: "",
+    },
+  })
 
-    const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const companion = await createTherapy(values)
+  const { watch } = form
+  const struggleValue = watch("struggle") || ""
+  const goalValue = watch("goal") || ""
 
-    if (companion) {
-      redirect(`/Haven/${companion.id}`)
-    } else {
-      console.error("Failed to create a companion")
-      redirect("/")
+  const onSubmit = async (values: FormValues) => {
+    setServerError(null)
+    setIsSubmitting(true)
+    try {
+      // createTherapy should be an API/client-call that returns the created companion
+      const companion = await createUserProfile(values)
+
+      if (companion && companion.id) {
+        // client-side navigation
+        router.push(`/Haven/${companion.id}`)
+      } else {
+        setServerError("Failed to create a companion. Please try again.")
+      }
+    } catch (err) {
+      console.error(err)
+      setServerError("Something went wrong. Please try again later.")
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
-    return (
+  return (
+    <div className="mx-auto w-full max-w-3xl p-4 md:p-8">
+      <div className="rounded-2xl bg-white/60 p-6 shadow-md backdrop-blur-md dark:bg-slate-900/60">
+        <h2 className="mb-2 text-2xl font-semibold">Create your Mira companion</h2>
+        <p className="mb-6 text-sm text-muted-foreground">Quick onboarding — tell Mira a little about you so she can respond better.</p>
+
+        {serverError && (
+          <div role="alert" className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            {serverError}
+          </div>
+        )}
+
         <Form {...form}>
-  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 gap-6 md:grid-cols-2">
 
-    {/* Preferred Name */}
-    <FormField
-      control={form.control}
-      name="preferred_name"
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>Preferred Name *</FormLabel>
-          <FormControl>
-            <Input placeholder="e.g., Alex" {...field} />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-
-    {/* Pronouns */}
-    <FormField
-      control={form.control}
-      name="pronouns"
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>Pronouns</FormLabel>
-          <FormControl>
-            <Select onValueChange={field.onChange} value={field.value}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select pronouns" />
-              </SelectTrigger>
-              <SelectContent>
-                {PRONOUN_OPTIONS.map(p => (
-                  <SelectItem key={p} value={p}>{p}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-
-    {/* Voice */}
-    <FormField
-      control={form.control}
-      name="voice"
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>Voice Type *</FormLabel>
-          <FormControl>
-            <Select onValueChange={field.onChange} value={field.value}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select voice" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="male">Male</SelectItem>
-                <SelectItem value="female">Female</SelectItem>
-              </SelectContent>
-            </Select>
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-
-    {/* Style */}
-    <FormField
-      control={form.control}
-      name="style"
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>Communication Style *</FormLabel>
-          <FormControl>
-            <Select onValueChange={field.onChange} value={field.value}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select style" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="formal">Formal</SelectItem>
-                <SelectItem value="casual">Casual </SelectItem>
-              </SelectContent>
-            </Select>
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-
-    {/* Struggle */}
-    <FormField
-      control={form.control}
-      name="struggle"
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>What are you currently struggling with? *</FormLabel>
-          <FormControl>
-            <Textarea
-              placeholder="E.g., I often feel overwhelmed by work deadlines..."
-              className="min-h-[100px]"
-              {...field}
+            {/* Preferred Name */}
+            <FormField
+              control={form.control}
+              name="preferred_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center justify-between">Preferred Name * <span className="ml-2 text-xs font-normal text-muted-foreground">How Mira will call you</span></FormLabel>
+                  <FormControl>
+                    <Input aria-required value={field.value} onChange={field.onChange} placeholder="e.g., Alex" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
 
-    {/* Goal */}
-    <FormField
-      control={form.control}
-      name="goal"
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>What is your main goal with Mira? *</FormLabel>
-          <FormControl>
-            <Textarea
-              placeholder="E.g., Build better time management habits..."
-              className="min-h-[100px]"
-              {...field}
+            {/* Pronouns */}
+            <FormField
+              control={form.control}
+              name="pronouns"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Pronouns</FormLabel>
+                  <FormControl>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger aria-label="Select pronouns">
+                        <SelectValue placeholder="Select pronouns" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="prefer_not_to_disclose">Prefer not to disclose</SelectItem>
+                        {PRONOUN_OPTIONS.map((p) => ( 
+                          <SelectItem key={p} value={p}>
+                            {p}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <p className="mt-1 text-xs text-muted-foreground">Optional — helps Mira use correct pronouns.</p>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
 
-    {/* Submit Button */}
-    <Button type="submit" className="w-full cursor-pointer">
-      Create My Mira Companion
-    </Button>
-  </form>
-</Form>
+            {/* Voice */}
+            <div className="md:col-span-1">
+              <FormField
+                control={form.control}
+                name="voice"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Voice Type *</FormLabel>
+                    <FormControl>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger aria-label="Select voice">
+                          <SelectValue placeholder="Select voice" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.keys(VOICE_OPTIONS).map((key) => (
+                            <SelectItem key={key} value={key}>
+                              {VOICE_OPTIONS[key as keyof typeof VOICE_OPTIONS]}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-    )
+            {/* Style */}
+            <div className="md:col-span-1">
+              <FormField
+                control={form.control}
+                name="style"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Communication Style *</FormLabel>
+                    <FormControl>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger aria-label="Select style">
+                          <SelectValue placeholder="Select style" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.keys(STYLE_OPTIONS).map((key) => (
+                            <SelectItem key={key} value={key}>
+                              {STYLE_OPTIONS[key as keyof typeof STYLE_OPTIONS]}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Struggle (span full width) */}
+            <div className="md:col-span-2">
+              <FormField
+                control={form.control}
+                name="struggle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>What are you currently struggling with? *</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        placeholder="E.g., I often feel overwhelmed by work deadlines..."
+                        className="min-h-[120px] resize-vertical"
+                        maxLength={800}
+                        aria-required
+                      />
+                    </FormControl>
+                    <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+                      <FormMessage />
+                      <div>{struggleValue.length}/800</div>
+                    </div>
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Goal (span full width) */}
+            <div className="md:col-span-2">
+              <FormField
+                control={form.control}
+                name="goal"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>What is your main goal with Mira? *</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        placeholder="E.g., Build better time management habits..."
+                        className="min-h-[120px] resize-vertical"
+                        maxLength={500}
+                        aria-required
+                      />
+                    </FormControl>
+                    <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+                      <FormMessage />
+                      <div>{goalValue.length}/500</div>
+                    </div>
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Submit Button */}
+            <div className="md:col-span-2">
+              <Button 
+              type="submit" 
+              className="w-full border border-blue-600 bg-white text-gray-900 hover:bg-blue-50" 
+              disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <span className="inline-flex items-center gap-2">
+                    <svg
+                      className="h-4 w-4 animate-spin"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      aria-hidden
+                    >
+                      <circle cx="12" cy="12" r="10" strokeWidth="3" stroke="currentColor" strokeOpacity="0.25"></circle>
+                      <path d="M22 12A10 10 0 0012 2" strokeWidth="3" stroke="currentColor"></path>
+                    </svg>
+                    Creating your companion...
+                  </span>
+                ) : (
+                  "Create My Mira Companion"
+                )}
+              </Button>
+            </div>
+
+          </form>
+        </Form>
+      </div>
+    </div>
+  )
 }
-
-export default UserForm

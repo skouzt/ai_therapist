@@ -9,7 +9,6 @@ const Page = async () => {
   return (
     <main className="flex justify-center items-start mb-20 px-4">
       <article className="w-full max-w-2xl flex flex-col gap-4">
-        <h1 className="mb-5 text-2xl font-bold">Companion Builder</h1>
         <UserForm />
       </article>
     </main>

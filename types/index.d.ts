@@ -70,13 +70,13 @@ export const voices = {
 };
 
 interface CreateTherapy {
-  userId: string;
-  preferredName: string;
-  pronouns?: string; // Optional field
-  voice: 'sarah' | 'mark' | string; // Use literals if known, or string
-  style: 'calm' | 'energetic' | 'neutral' | string; // Use literals if known, or string
-  struggle: string;
-  goal: string;
+    preferred_name: string; // <-- Note the underscore here
+    voice: "male" | "female";
+    style: "casual" | "formal";
+    struggle: string;
+    goal: string;
+    pronouns?: string | undefined;
+    
 }
 
 interface CreateSessionData {

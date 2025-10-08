@@ -11,8 +11,7 @@ import { Mic, MicOff, Phone, PhoneOff, Loader2, Brain, Repeat2 } from "lucide-re
 
 // IMPORT YOUR DATABASE ACTIONS
 import { 
-    updateTherapySession, 
-    endTherapySession 
+    addToTherapySessions
 } from "@/lib/action/therapist.action";
 
 enum CallStatus {
@@ -24,34 +23,36 @@ enum CallStatus {
 }
 
 interface MiraAssistantProps {
-    userName: string;
+    preferred_name:string,
     userImage: string;
     style: string;
     voice: string;
+    goal:string;
+    struggle:string
+    therapyId:string;
 }
 
 const MiraAssistant = ({
-    userName,
+    preferred_name,
     userImage,
     style,
     voice,
+    goal,
+    struggle,
+    therapyId
 }: MiraAssistantProps) => {
-    // --- State and Constants (Unchanged functionality) ---
     const assistantName = "Mira, The Wellness Guide";
 
     const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
     const [isSpeaking, setIsSpeaking] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
     
-    const [currentSessionId, setCurrentSessionId] = useState<number | null>(null);
+    const [currentSessionId] = useState<number | null>(null);
     
-    const [messages, setMessages] = useState<{ role: string; content: string }[]>(
-        []
-    );
+    const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
     const lottieRef = useRef<LottieRefCurrentProps>(null);
     const transcriptRef = useRef<HTMLDivElement>(null); 
 
-    // --- useEffects (Vapi Listeners & Scroll) - UNCHANGED ---
     useEffect(() => {
         if (transcriptRef.current) {
             transcriptRef.current.scrollTop = transcriptRef.current.scrollHeight;
@@ -66,13 +67,10 @@ const MiraAssistant = ({
     useEffect(() => {
         const onCallStart = () => setCallStatus(CallStatus.ACTIVE);
         
-        const onCallEnd = () => {
-            if (callStatus === CallStatus.ACTIVE && currentSessionId !== null) {
-                handleFinishSession(currentSessionId);
-            } else {
-                setCallStatus(CallStatus.FINISHED);
-            }
-        };
+         const onCallEnd = () => {
+      setCallStatus(CallStatus.FINISHED);
+      addToTherapySessions(therapyId);
+    };
 
         const onMessage = (message: any) => {
             if (message.type === "transcript" && message.transcriptType === "final") {
@@ -105,7 +103,6 @@ const MiraAssistant = ({
         };
     }, [callStatus, currentSessionId]);
 
-    // --- Control Functions - UNCHANGED ---
     const ToggleMicrophone = () => {
         const muted = vapi.isMuted();
         vapi.setMuted(!muted);
@@ -114,73 +111,34 @@ const MiraAssistant = ({
 
     const generateSummary = (): string => {
         return messages
-            .map(m => `${m.role === 'assistant' ? assistantName : userName}: ${m.content}`)
+            .map(m => `${m.role === 'assistant' ? assistantName :  preferred_name}: ${m.content}`)
             .join('\n\n');
     };
 
-    const handleFinishSession = async (sessionId: number) => {
-        setCallStatus(CallStatus.FINISHING); 
-        
-        const finalSummary = generateSummary();
 
-        try {
-            const result = await endTherapySession(sessionId, finalSummary);
-            
-            if (result.success) {
-                console.log(`Session ${sessionId} successfully ended and recorded.`);
-            } else {
-                console.error("Failed to save session:", result.error);
-                alert(`Failed to save session: ${result.error}`);
-            }
-        } catch (error) {
-            console.error("Failed to save session summary:", error);
-            alert("An error occurred while saving the session.");
-        } finally {
-            setCurrentSessionId(null);
-            setCallStatus(CallStatus.FINISHED);
-            setMessages([]);
-        }
+
+  const handleCall = async () => {
+    setCallStatus(CallStatus.CONNECTING);
+
+    const assistantOverrides = {
+      variableValues: {
+        goal,
+        struggle,
+        style,
+      },
+      clientMessages: ["transcript"],
+      serverMessages: [],
     };
-
-    // START SESSION (VAPI call + Database write)
-    const handleCall = async () => {
-        setCallStatus(CallStatus.CONNECTING);
-        
-        try {
-            // Create new therapy session in database
-            const result = await createTherapySession({
-                goal_focus: `Therapy session with ${assistantName}`,
-            });
-
-            if (!result.success || !result.data) {
-                throw new Error(result.error || "Failed to create session");
-            }
-
-            //@ts-ignore
-            setCurrentSessionId(result.data.session_id);
-
-            // Configure and start VAPI call
-            const assistantOverrides = {
-                variableValues: { userName },
-                clientMessages: ["transcript"],
-                serverMessages: [],
-            };
-            
-            //@ts-expect-error
-            vapi.start(configureAssistant(voice, style), assistantOverrides);
-
-        } catch (error) {
-            console.error("Failed to start session:", error);
-            setCallStatus(CallStatus.INACTIVE);
-            setCurrentSessionId(null);
-            alert("Failed to start session. Please check authentication and database connection.");
-        }
-    };
+    //@ts-expectederror
+    vapi.start(configureAssistant(voice, style), assistantOverrides);
+  };
 
     // END SESSION
-    const handleDisconnect = () => {
-        vapi.stop(); 
-    };
+const handleDisconnect = () => {
+    setCallStatus(CallStatus.FINISHED);
+    vapi.stop();
+  };
+
 
     // --- Status Flags - UNCHANGED ---
     const isCallActive = callStatus === CallStatus.ACTIVE;
@@ -287,7 +245,7 @@ const MiraAssistant = ({
                                         )}
                                     >
                                         <span className="font-semibold mr-1">
-                                            {message.role === "assistant" ? "Mira" : userName}:
+                                            {message.role === "assistant" ? "Mira" :  preferred_name}:
                                         </span>{" "}
                                         {message.content}
                                     </div>
@@ -307,12 +265,12 @@ const MiraAssistant = ({
                     <div className="flex flex-col items-center p-8 bg-white border border-gray-200 rounded-2xl shadow-sm">
                         <Image
                             src={userImage}
-                            alt={userName}
+                            alt={preferred_name}
                             width={120}
                             height={120}
                             className="rounded-full object-cover shadow-md mb-4"
                         />
-                        <p className="font-bold text-xl text-gray-900">{userName}</p>
+                        <p className="font-bold text-xl text-gray-900">{ preferred_name}</p>
                         <p className="text-sm text-gray-500 mt-1">User</p>
                     </div>
 

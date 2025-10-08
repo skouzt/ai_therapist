@@ -7,6 +7,7 @@ module.exports = {
     // Ensure this content array is correct for your project structure
     './app/**/*.{js,ts,jsx,tsx}',
     './component/**/*.{js,ts,jsx,tsx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}', 
   ],
   theme: {
   	extend: {

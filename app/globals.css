@@ -2,6 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
+
+.liquid-glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 0.5px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 60px rgba(0, 0, 0, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+/* TEMP: ensure select content and items render as rows and don't overlap */
+[data-slot="select-content"] {
+  z-index: 99999;
+}
+
+[data-slot="select-content"] [data-slot="select-item"] {
+  display: flex !important;
+  align-items: center !important;
+  min-height: 40px !important;
+  padding: 8px 12px !important;
+  margin-bottom: 4px !important;
+  white-space: normal !important;
+}
+
+[data-slot="select-content"] [data-slot="select-item"]>* {
+  line-height: 1.2 !important;
+}[data-slot="select-content"] { z-index: 99999; }
+[data-slot="select-content"] [data-slot="select-item"] {
+  display: flex !important;
+  align-items: center !important;
+  min-height: 40px !important;
+  padding: 8px 12px !important;
+  margin-bottom: 4px !important;
+  white-space: normal !important;
+}
+
 :root {
   --primary: #42b6f0;
   --background-light: #f6f7f8;
@@ -18,21 +54,8 @@ body {
 
 /* ==== Utility Styles ==== */
 
-.glassmorphism {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
 
-.liquid-glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 0.5px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 60px rgba(0, 0, 0, 0.1),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
-}
+
 
 /* ==== Animations ==== */
 
@@ -41,9 +64,11 @@ body {
     transform: rotate(360deg);
   }
 }
+
 .animate-spin-slow {
   animation: spin-slow 20s linear infinite;
 }
+
 .animate-spin-slow-reverse {
   animation: spin-slow 25s linear infinite reverse;
 }
@@ -53,23 +78,28 @@ body {
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
     opacity: 0.6;
   }
+
   25% {
     transform: translate(-40%, -60%) rotate(90deg) scale(1.05);
     opacity: 0.7;
   }
+
   50% {
     transform: translate(-60%, -40%) rotate(180deg) scale(1.1);
     opacity: 0.65;
   }
+
   75% {
     transform: translate(-70%, -30%) rotate(270deg) scale(1.03);
     opacity: 0.75;
   }
+
   100% {
     transform: translate(-50%, -50%) rotate(360deg) scale(1);
     opacity: 0.6;
   }
 }
+
 .animate-color-flow {
   animation: color-flow 40s ease-in-out infinite alternate;
 }
@@ -82,9 +112,11 @@ body {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+
   :root {
     --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;
@@ -112,6 +144,7 @@ body {
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
+
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
